@@ -130,6 +130,14 @@ def merge_int_to_string(secrets):
     return byte_data.decode('ascii').rstrip('\x00')
 
 
+# in_numbers(numbers, value) returns boolean whether or not value is in array
+def in_numbers(numbers, value):
+    for n in numbers:
+        if n == value:
+            return True
+    return False
+
+
 if __name__ == '__main__':
     # # 1. random_number
     # for i in range(100):
@@ -166,5 +174,6 @@ if __name__ == '__main__':
     print(s)
     arr = split_secret_to_int(s)
     print(arr)
+    print(in_numbers(arr, 49937119214509114343548691117920141602615245118674498473442528546336026425464))
     rs = merge_int_to_string(arr)
     print(rs)
