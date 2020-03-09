@@ -8,6 +8,9 @@ import sys
 from binascii import hexlify, unhexlify
 from base64 import b64encode, b64decode
 
+# The largest PRIME 256-bit big.Int
+# https://primes.utm.edu/lists/2small/200bit.html
+# PRIME = 2^n - k = 2^256 - 189
 PRIME = 115792089237316195423570985008687907853269984665640564039457584007913129639747
 
 
@@ -45,12 +48,28 @@ def to_base64(number):
     return b64data
 
 
+# Returns the number base64 in base 10 Int representation; note: this is
+# not coming from a string representation; the base64 input is exactly 256
+# bits long, and the output is an arbitrary size base 10 integer.
+def from_base64(number):
+    numbyte = b64decode(number)
+    return int.from_bytes(numbyte, 'big')
+
+
 # Returns the Int number base10 in Hex representation; note: this is
 # not a string representation; the Hex output is exactly 256 bits long.
 def to_hex(number):
     numbyte = number.to_bytes(32, 'big')
     hexdata = hexlify(numbyte).decode('ascii')
     return hexdata
+
+
+# Returns the number Hex in base 10 Int representation; note: this is
+# not coming from a string representation; the Hex input is exactly 256
+# bits long, and the output is an arbitrary size base 10 integer.
+def from_hex(number):
+    numbyte = unhexlify(number)
+    return int.from_bytes(numbyte, 'big')
 
 
 if __name__ == '__main__':
@@ -68,10 +87,19 @@ if __name__ == '__main__':
     # print((a * v) % PRIME)
     # # 1
 
-    # 3. to_base64
+    # 3. encode/decode
     # number = 2020
+    # encode
     number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
-    print(to_base64(number))
+    print(number)
+    b64data = to_base64(number)
+    print(b64data)  # b'lOpFwywpCeVAcK0/LOKG+YtW71xyj1bX06CcW7VZMFc='
     hexdata = to_hex(number)
-    print(len(hexdata))
-    print(hexdata)
+    print(len(hexdata))  # 64
+    print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
+    # decode
+    numb64decode = from_base64(b64data)
+    print(numb64decode)
+    numhexdecode = from_hex(hexdata)
+    print(numhexdecode)
+
