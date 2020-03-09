@@ -2,7 +2,7 @@
 @author nghiatc
 @since Mar 9, 2020
 """
-
+import math
 import random
 import sys
 from binascii import hexlify, unhexlify
@@ -72,6 +72,64 @@ def from_hex(number):
     return int.from_bytes(numbyte, 'big')
 
 
+# Evaluates a polynomial with coefficients specified in reverse order:
+#  evaluatePolynomial([a, b, c, d], x):
+#  		return a + bx + cx^2 + dx^3
+#  Horner's method: ((dx + c)x + b)x + a
+def evaluate_polynomial(polynomial, value):
+    last = len(polynomial) - 1
+    result = polynomial[last]
+    s = last - 1
+    while s >= 0:
+        # result = result.Mul(result, value)
+        # result = result.Add(result, polynomial[s])
+        # result = result.Mod(result, PRIME)
+        result = (result * value + polynomial[s]) % PRIME
+        # result = result + polynomial[s]
+        # result = result % PRIME
+        s = s -1
+    return result
+
+
+# Converts a byte array into an a 256-bit Int, array based upon size of
+# the input byte; all values are right-padded to length 256, even if the most
+# significant bit is zero.
+def split_secret_to_int(secret):
+    result = []
+    hex_data = "".join("{:02x}".format(ord(c)) for c in secret)
+    print(hex_data)
+    print(len(hex_data))
+    count = math.ceil(len(hex_data) / 64.0)
+    print(count)
+    i = 0
+    while i < count:
+        if (i+1)*64 < len(hex_data):
+            subs = hex_data[i*64:(i+1)*64]
+            result.append(int(subs, 16))
+        else:
+            last = hex_data[i*64:len(hex_data)]
+            n = 64 - len(last)
+            j = 0
+            while j < n:
+                last += "0"
+                j = j + 1
+            result.append(int(last, 16))
+        i = i + 1
+    return result
+
+
+# Converts an array of Ints to the original byte array, removing any
+# least significant nulls.
+def merge_int_to_string(secrets):
+    hex_data = ""
+    for s in secrets:
+        tmp = to_hex(s)
+        hex_data += tmp
+    byte_data = unhexlify(hex_data)
+    print(byte_data)
+    return byte_data.decode('ascii').rstrip('\x00')
+
+
 if __name__ == '__main__':
     # # 1. random_number
     # for i in range(100):
@@ -87,19 +145,26 @@ if __name__ == '__main__':
     # print((a * v) % PRIME)
     # # 1
 
-    # 3. encode/decode
-    # number = 2020
-    # encode
-    number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
-    print(number)
-    b64data = to_base64(number)
-    print(b64data)  # b'lOpFwywpCeVAcK0/LOKG+YtW71xyj1bX06CcW7VZMFc='
-    hexdata = to_hex(number)
-    print(len(hexdata))  # 64
-    print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
-    # decode
-    numb64decode = from_base64(b64data)
-    print(numb64decode)
-    numhexdecode = from_hex(hexdata)
-    print(numhexdecode)
+    # # 3. encode/decode
+    # # number = 2020
+    # # encode
+    # number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
+    # print(number)
+    # b64data = to_base64(number)
+    # print(b64data)  # b'lOpFwywpCeVAcK0/LOKG+YtW71xyj1bX06CcW7VZMFc='
+    # hexdata = to_hex(number)
+    # print(len(hexdata))  # 64
+    # print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
+    # # decode
+    # numb64decode = from_base64(b64data)
+    # print(numb64decode)
+    # numhexdecode = from_hex(hexdata)
+    # print(numhexdecode)
 
+    # 4. split & merge
+    s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    print(s)
+    arr = split_secret_to_int(s)
+    print(arr)
+    rs = merge_int_to_string(arr)
+    print(rs)
