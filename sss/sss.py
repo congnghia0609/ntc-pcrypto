@@ -76,18 +76,14 @@ def from_hex(number):
 #  evaluatePolynomial([a, b, c, d], x):
 #  		return a + bx + cx^2 + dx^3
 #  Horner's method: ((dx + c)x + b)x + a
-def evaluate_polynomial(polynomial, value):
-    last = len(polynomial) - 1
-    result = polynomial[last]
+def evaluate_polynomial(polynomial, part, value):
+    # print(value, polynomial[part])
+    last = len(polynomial[part]) - 1
+    result = polynomial[part][last]
     s = last - 1
     while s >= 0:
-        # result = result.Mul(result, value)
-        # result = result.Add(result, polynomial[s])
-        # result = result.Mod(result, PRIME)
-        result = (result * value + polynomial[s]) % PRIME
-        # result = result + polynomial[s]
-        # result = result % PRIME
-        s = s -1
+        result = (result * value + polynomial[part][s]) % PRIME
+        s = s - 1
     return result
 
 
@@ -96,11 +92,11 @@ def evaluate_polynomial(polynomial, value):
 # significant bit is zero.
 def split_secret_to_int(secret):
     result = []
-    hex_data = "".join("{:02x}".format(ord(c)) for c in secret)
-    print(hex_data)
-    print(len(hex_data))
+    hex_data = hexlify(secret.encode('ascii')).decode('ascii')  # "".join("{:02x}".format(ord(c)) for c in secret)
+    # print(hex_data)
+    # print(len(hex_data))
     count = math.ceil(len(hex_data) / 64.0)
-    print(count)
+    # print(count)
     i = 0
     while i < count:
         if (i+1)*64 < len(hex_data):
@@ -123,11 +119,13 @@ def split_secret_to_int(secret):
 def merge_int_to_string(secrets):
     hex_data = ""
     for s in secrets:
+        # tmp = "{0:0{1}x}".format(s,32)  #to_hex(s)
         tmp = to_hex(s)
+        # print("tmp:", tmp)
         hex_data += tmp
-    byte_data = unhexlify(hex_data)
-    print(byte_data)
-    return byte_data.decode('ascii').rstrip('\x00')
+    byte_data = unhexlify(hex_data).decode('ascii').rstrip('\x00')
+    # print(byte_data)
+    return byte_data
 
 
 # in_numbers(numbers, value) returns boolean whether or not value is in array
@@ -143,7 +141,7 @@ def in_numbers(numbers, value):
 # share to recreate, of length shares, from the input secret raw as a string.
 def create(minimum, shares, secret, is_base64):
     result = []
-    
+
     # Verify minimum isn't greater than shares; there is no way to recreate
     # the original polynomial in our current setup, therefore it doesn't make
     # sense to generate fewer shares than are needed to reconstruct the secrets.
@@ -152,6 +150,7 @@ def create(minimum, shares, secret, is_base64):
 
     # Convert the secrets to its respective 256-bit Int representation.
     secrets = split_secret_to_int(secret)
+    # print("secrets:", secrets)
 
     # List of currently used numbers in the polynomial
     numbers = [0]
@@ -164,19 +163,22 @@ def create(minimum, shares, secret, is_base64):
     # a different polynomial for each part of the secrets.
     #
     # polynomial[parts][minimum]
-    polynomial = [[0] * minimum] * len(secrets)
+    # https://www.geeksforgeeks.org/python-using-2d-arrays-lists-the-right-way/
+    polynomial = [[0 for i in range(minimum)] for j in range(len(secrets))]
     # print(polynomial)
-    for i in range(len(polynomial)):
+    for i in range(len(secrets)):
         polynomial[i][0] = secrets[i]
-        for j in range(len(polynomial[i])):
-            if j > 0:
-                # Each coefficient should be unique
+        j = 1
+        while j < minimum:
+            # Each coefficient should be unique
+            number = random_number()
+            while in_numbers(numbers, number):
                 number = random_number()
-                while in_numbers(numbers, number):
-                    number = random_number()
-                numbers.append(number)
+            numbers.append(number)
 
-                polynomial[i][j] = number
+            polynomial[i][j] = number
+            j = j + 1
+    # print("polynomial:", polynomial)
 
     # Create the points object; this holds the (x, y) points of each share.
     # Again, because secrets is an array, each share could have multiple parts
@@ -187,13 +189,12 @@ def create(minimum, shares, secret, is_base64):
     # in the inner loop. Can disappear later if desired.
     #
     # points[shares][parts][2]
-    points = [[[0] * 2] * len(secrets)] * shares
-    # print(points)
+    points = [[[0 for i in range(2)] for j in range(len(secrets))] for k in range(shares)]
     # For every share...
-    for i in range(len(points)):
+    for i in range(shares):
         s = ""
         # and every part of the secrets...
-        for j in range(len(points[i])):
+        for j in range(len(secrets)):
             # generate a new x-coordinate.
             number = random_number()
             while in_numbers(numbers, number):
@@ -202,7 +203,7 @@ def create(minimum, shares, secret, is_base64):
 
             # and evaluate the polynomial at that point.
             points[i][j][0] = number
-            points[i][j][1] = evaluate_polynomial(polynomial[j], number)
+            points[i][j][1] = evaluate_polynomial(polynomial, j, number)
 
             # add it to results.
             if is_base64:
@@ -212,7 +213,163 @@ def create(minimum, shares, secret, is_base64):
                 s += to_hex(points[i][j][0])
                 s += to_hex(points[i][j][1])
         result.append(s)
+    # print("create:", points)
     return result
+
+
+# Takes a string array of shares encoded in Base64 or Hex created via Shamir's Algorithm
+#     Note: the polynomial will converge if the specified minimum number of shares
+#           or more are passed to this function. Passing thus does not affect it
+#           Passing fewer however, simply means that the returned secret is wrong.
+def combine(shares, is_base64):
+    if len(shares) == 0:
+        raise Exception('shares is NULL or empty')
+
+    # Recreate the original object of x, y points, based upon number of shares
+    # and size of each share (number of parts in the secret).
+    #
+    # points[shares][parts][2]
+    if is_base64:
+        points = decode_share_base64(shares)
+    else:
+        points = decode_share_hex(shares)
+    # print("combine:", points)
+
+    # Use Lagrange Polynomial Interpolation (LPI) to reconstruct the secrets.
+    # For each part of the secrets (clearest to iterate over)...
+    secrets = [0 for i in range(len(points[0]))]
+    for j in range(len(points[0])):
+        secrets[j] = 0
+        # and every share...
+        for i in range(len(points)):  # LPI sum loop
+            # remember the current x and y values.
+            ax = points[i][j][0]  # ax
+            ay = points[i][j][1]  # ay
+            numerator = 1  # LPI numerator
+            denominator = 1  # LPI denominator
+            # and for every other point...
+            for k in range(len(points)):  # LPI product loop
+                if k != i:
+                    # combine them via half products.
+                    # x=0 ==> [(0-bx)/(ax-bx)] * ...
+                    bx = points[k][j][0]  # bx
+                    negbx = -bx  # (0 - bx)
+                    axbx = ax - bx  # (ax - bx)
+
+                    numerator = (numerator * negbx) % PRIME  # (0 - bx) * ...
+                    denominator = (denominator * axbx) % PRIME  # (ax - bx) * ...
+
+            # LPI product: x=0, y = ay * [(x-bx)/(ax-bx)] * ...
+            # multiply together the points (ay)(numerator)(denominator)^-1 ...
+            fx = ay
+            fx = (fx * numerator) % PRIME
+            fx = (fx * modinv(denominator, PRIME)) % PRIME
+
+            # LPI sum: s = fx + fx + ...
+            secrets[j] = (secrets[j] + fx) % PRIME
+    # print("secrets:", secrets)
+    return merge_int_to_string(secrets)
+
+
+# Takes a string array of shares encoded in Base64 created via Shamir's
+# Algorithm; each string must be of equal length of a multiple of 88 characters
+# as a single 88 character share is a pair of 256-bit numbers (x, y).
+def decode_share_base64(shares):
+    # Recreate the original object of x, y points, based upon number of shares
+    # and size of each share (number of parts in the secret).
+    secrets = [0] * len(shares)
+
+    # For each share...
+    for i in range(len(shares)):
+        # ensure that it is valid.
+        if not is_valid_share_base64(shares[i]):
+            raise Exception('one of the shares is invalid')
+
+        # find the number of parts it represents.
+        share = shares[i]
+        count = (int)(len(share) / 88)
+        # print("count:", count)
+        secrets[i] = [0] * count
+
+        # and for each part, find the x,y pair...
+        for j in range(count):
+            cshare = share[j*88:(j+1)*88]
+            secrets[i][j] = [0] * 2
+            # decoding from Base64.
+            secrets[i][j][0] = from_base64(cshare[0:44])
+            secrets[i][j][1] = from_base64(cshare[44:])
+    return secrets
+
+
+# akes a string array of shares encoded in Hex created via Shamir's
+# Algorithm; each string must be of equal length of a multiple of 128 characters
+# as a single 128 character share is a pair of 256-bit numbers (x, y).
+def decode_share_hex(shares):
+    # Recreate the original object of x, y points, based upon number of shares
+    # and size of each share (number of parts in the secret).
+    secrets = [0] * len(shares)
+
+    # For each share...
+    for i in range(len(shares)):
+        # ensure that it is valid.
+        if not is_valid_share_hex(shares[i]):
+            raise Exception('one of the shares is invalid')
+
+        # find the number of parts it represents.
+        share = shares[i]
+        count = (int)(len(share) / 128)
+        secrets[i] = [0] * count
+
+        # and for each part, find the x,y pair...
+        for j in range(count):
+            cshare = share[j*128:(j + 1)*128]
+            secrets[i][j] = [0] * 2
+            # decoding from Base64.
+            secrets[i][j][0] = from_hex(cshare[0:64])
+            secrets[i][j][1] = from_hex(cshare[64:])
+    return secrets
+
+
+# Takes in a given string to check if it is a valid secret
+#
+# Requirements:
+#   Length multiple of 88
+#   Can decode each 44 character block as Base64
+#
+# Returns only success/failure (bool)
+def is_valid_share_base64(candidate):
+    if len(candidate) == 0 or len(candidate) % 88 != 0:
+        return False
+    count = len(candidate) / 44
+    j = 0
+    while j < count:
+        part = candidate[j*44:(j + 1)*44]
+        decode = from_base64(part)
+        if decode < 0 or decode == PRIME:
+            return False
+        j = j + 1
+    return True
+
+
+# Takes in a given string to check if it is a valid secret
+#
+# Requirements:
+#  	Length multiple of 128
+# 	Can decode each 64 character block as Hex
+#
+# Returns only success/failure (bool)
+def is_valid_share_hex(candidate):
+    if len(candidate) == 0 or len(candidate) % 128 != 0:
+        return False
+    count = len(candidate) / 64
+    j = 0
+    while j < count:
+        part = candidate[j*64:(j + 1)*64]
+        decode = from_hex(part)
+        if decode < 0 or decode == PRIME:
+            return False
+        j = j + 1
+    return True
 
 
 if __name__ == '__main__':
@@ -236,6 +393,7 @@ if __name__ == '__main__':
     # number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
     # print(number)
     # b64data = to_base64(number)
+    # print(len(b64data))
     # print(b64data)  # lOpFwywpCeVAcK0/LOKG+YtW71xyj1bX06CcW7VZMFc=
     # hexdata = to_hex(number)
     # print(len(hexdata))  # 64
@@ -249,15 +407,24 @@ if __name__ == '__main__':
     # # 4. split & merge
     # s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     # print(s)
+    # print(len(s))
     # arr = split_secret_to_int(s)
     # print(arr)
     # print(in_numbers(arr, 49937119214509114343548691117920141602615245118674498473442528546336026425464))
     # rs = merge_int_to_string(arr)
     # print(rs)
+    # print(len(rs))
 
     # 5. create
-    # creates a set of shares
+    # test1
     s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    arr = create(3, 6, s, False)
-    print(arr)
+    print("secret:", s)
+    print("secret.length:", len(s))
+    # creates a set of shares
+    arr = create(3, 6, s, True)
+    # combines shares into secret
+    s1 = combine(arr[:3], True)
+    print("combines shares 1 length =", len(arr[:3]))
+    print("secret:", s1)
+    print("secret.length:", len(s1))
 
