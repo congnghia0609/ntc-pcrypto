@@ -6,7 +6,7 @@ import math
 import random
 import sys
 from binascii import hexlify, unhexlify
-from base64 import b64encode, b64decode
+from base64 import urlsafe_b64encode, urlsafe_b64decode
 
 # The largest PRIME 256-bit big.Int
 # https://primes.utm.edu/lists/2small/200bit.html
@@ -44,7 +44,7 @@ def modinv(a, m):
 # not a string representation; the base64 output is exactly 256 bits long.
 def to_base64(number):
     numbyte = number.to_bytes(32, 'big')
-    b64data = b64encode(numbyte)
+    b64data = urlsafe_b64encode(numbyte)
     return b64data.decode('ascii')
 
 
@@ -52,7 +52,7 @@ def to_base64(number):
 # not coming from a string representation; the base64 input is exactly 256
 # bits long, and the output is an arbitrary size base 10 integer.
 def from_base64(number):
-    numbyte = b64decode(number)
+    numbyte = urlsafe_b64decode(number)
     return int.from_bytes(numbyte, 'big')
 
 
@@ -417,12 +417,41 @@ if __name__ == '__main__':
 
     # 5. create & combine
 
-    # test1
+    # # test1
+    # s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    # print("secret:", s)
+    # print("secret.length:", len(s))
+    # # creates a set of shares
+    # arr = create(3, 6, s, True)
+    # # combines shares into secret
+    # s1 = combine(arr[:3], True)
+    # print("combines shares 1 length =", len(arr[:3]))
+    # print("secret:", s1)
+    # print("secret.length:", len(s1))
+    #
+    # s2 = combine(arr[3:], True)
+    # print("combines shares 2 length =", len(arr[3:]))
+    # print("secret:", s2)
+    # print("secret.length:", len(s2))
+    #
+    # s3 = combine(arr[1:5], True)
+    # print("combines shares 3 length =", len(arr[1:5]))
+    # print("secret:", s3)
+    # print("secret.length:", len(s3))
+
+    # test2
     s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     print("secret:", s)
     print("secret.length:", len(s))
     # creates a set of shares
-    arr = create(3, 6, s, True)
+    arr = [
+        "3yHo_uVUBRJJ8AiBL-3SS2OAFoe8A0lYF9PVsylFpfU=hFNCvpl0Vo9pESdgVuQs88bna5lMFgfVsixJEjT38EU=rnqFtyOaWu6ROU7LqegKRBG3hnr75Uwa3xTLRTD_Ahs=HeD7Nh0314-9m6YAaAiLKv5QiPToYd_PpSOveTPf-08=VLnVwLvMoEy19oHz7F1RuQjexvNdBB9Z_0VBFpz3-tw=FVJFrnO0LyhswtULPNUQr3j-rwPVrruAp-SrU-JDQcU=6dUlv2kHgZNYlV0ZiVhtQ_E-Vdt5Qu_74_ur8hLkTaM=oOyKYNhTd98bif9cEOVxPQCJjOh7haA63COMtGVLGDA=",
+        "coKbKOpKsucIF0hLgL6r2dOJpQ52TXnqU4Y4Znc26aU=Byrn3KrQn8Rq8-F49THePjAxy1fkixnjf7H-Q82tlNY=C-17nZaq6PPDfHCDPIpmVa928rUYAXxkhop-1dhyEqg=kn_fIXrpRCh1WluMW2EQddz9Vlj7m4SlUWnSAupD6yQ=yrT7uX2bF0AEdOUFQx1sd-SAYBj4vY0wLQaXkilp9LQ=65RU1AOhohmmN5dmKChFipsCdCraLIu1I0tlfUCdtdQ=_oHtNTo71hjx5RO_BaDJq2hiZTvpQjN6-O4n6zf8F_M=bd5XjTzbwgZIoXDCeqX_lGbCAIW1kepA-j6xRChI5Co=",
+        "O7As77L_0wcYIjvuL-Uod9WNAWWsB1W3iFjSVPDfgDE=bfOMBFU6n6dcMTmD7Vp67xwyUMQDLMVv3dkJfU0-GAE=N7rOnWAcjXG_SA0UZyfTi4Rv17ja5_8otHG4nbnYsUE=xhfjU2E_Zc3ldk5S5vUS3nUbHcWP_8Co0ROXF_542T8=3_XtNGxPNC_ZPRydvGdeGomiHRU1alWEFbfYPE4TFPg=hUA48-h2u6gJs4g5wDmvQzbTXQlAagBG3VjBQYGgjDI=AZHs5DhgW27YC5Tw0bW4wkbwpq7l13JNyEpR6m6PM0s=ZLA7GzYugrD-ii2h0f9kx0F8dS0TJQEJgcM1sg4KxHQ=",
+        "1qi-z1_JzZq1pPaQlajigXK7ZLD49o9uEbAG0i2JPRE=F_-WklezDbbn5TwLzwgTH7y4CrdtgzHkRnoT7yGvlOc=L2ydfKaeEZAdO99MEW5z2_G73Cw17GKSjrFBrtlv91w=AVDKhDGyMJjcslpMKP796I6gMAs7Y3B5Oqqo0abpTSo=Jk2aKW6g1Ol88MXn2mZcRE7o_mjlK4L4rm7Mn-1xW4Y=PTxmdcCnxcI30aqkf1vmC96CmGovnH2G_RvtRaudmoE=vlw4fz5CHvoUteCz1KiQ4VvS_AmZqJUbMC1qIh4TTbU=uNF3vO6B7Q9nA29FFoDg5XnryRJAWPf0Fyn5-qNgorg=",
+        "BvCmwKngaukEhX9PbO_mbs-kVXJZasFnCTbG1BU4uy8=D5R_MinicWA4MSUYlurfxKeMqHjXcsnB8fe6eGlWl2Q=4EqtWUErsPDEupb-lyrFBcrsDVmutZao3u7NMM0j-eE=atF3vl9wmfzGWsPtaYgmMA3K6VbEctYO0PvxLYEqhPs=yWvAcAYRiz7N08AxR7gS6FUkw5K9Fufb0TUvv6sn0Go=QnYDo7XCF0A_q4zdKLgrzSuwGxdACySdy_YyvbQXKFU=zoJeB5fBh-_JZXZh_e9_lI0VYZfj2sSmn0QU5rbDzjw=RJW7Ip7iy2E5bzLFmA0MRluWRBI_unyVeCIrxSFgnr0=",
+        "H7L3h0FeMRJhlOjb4P7ujl8TU62V6BR-3hmrgeZSsqY=YIgcyaTE2i9cjWGy2KYwXG-Bihe5tVqwTDvfpGG0bjc=HaQPRVj61WadfsKTNQ_nz8Ysmuw8kbTTdtTUq4pr8ow=mral1sUzGfHO7wqBG5OjpieS8OQVcfWUGMefSmoePwM=hTgwBQUnnz5NpUjq-f5ZmFLeraoWqAUXu3FvpN2InoY=_O78YvsYo8BdIVwlixp889NAACSo1fnHjXwZ06X8LIQ=D_gDXhWQ4efiIxJPn-80PiCE1qRt89bh_IK0ZOZt9Ew=tYgTQLKfnvNrlq8fMyPnKWJ165zEuvu3lOpWnw8_Qiw="
+    ]
     # combines shares into secret
     s1 = combine(arr[:3], True)
     print("combines shares 1 length =", len(arr[:3]))
