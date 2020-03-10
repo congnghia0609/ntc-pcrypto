@@ -415,7 +415,8 @@ if __name__ == '__main__':
     # print(rs)
     # print(len(rs))
 
-    # 5. create
+    # 5. create & combine
+
     # test1
     s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     print("secret:", s)
@@ -427,4 +428,14 @@ if __name__ == '__main__':
     print("combines shares 1 length =", len(arr[:3]))
     print("secret:", s1)
     print("secret.length:", len(s1))
+
+    s2 = combine(arr[3:], True)
+    print("combines shares 2 length =", len(arr[3:]))
+    print("secret:", s2)
+    print("secret.length:", len(s2))
+
+    s3 = combine(arr[1:5], True)
+    print("combines shares 3 length =", len(arr[1:5]))
+    print("secret:", s3)
+    print("secret.length:", len(s3))
 
