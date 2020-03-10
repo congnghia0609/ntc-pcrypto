@@ -143,8 +143,13 @@ def in_numbers(numbers, value):
 # share to recreate, of length shares, from the input secret raw as a string.
 def create(minimum, shares, secret, is_base64):
     result = []
+    
+    # Verify minimum isn't greater than shares; there is no way to recreate
+    # the original polynomial in our current setup, therefore it doesn't make
+    # sense to generate fewer shares than are needed to reconstruct the secrets.
     if minimum > shares:
         raise Exception('cannot require more shares then existing')
+
     # Convert the secrets to its respective 256-bit Int representation.
     secrets = split_secret_to_int(secret)
 
@@ -160,7 +165,7 @@ def create(minimum, shares, secret, is_base64):
     #
     # polynomial[parts][minimum]
     polynomial = [[0] * minimum] * len(secrets)
-    print(polynomial)
+    # print(polynomial)
     for i in range(len(polynomial)):
         polynomial[i][0] = secrets[i]
         for j in range(len(polynomial[i])):
@@ -183,9 +188,11 @@ def create(minimum, shares, secret, is_base64):
     #
     # points[shares][parts][2]
     points = [[[0] * 2] * len(secrets)] * shares
-    print(points)
+    # print(points)
+    # For every share...
     for i in range(len(points)):
         s = ""
+        # and every part of the secrets...
         for j in range(len(points[i])):
             # generate a new x-coordinate.
             number = random_number()
