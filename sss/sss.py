@@ -76,7 +76,6 @@ def from_hex(number):
 #  		return a + bx + cx^2 + dx^3
 #  Horner's method: ((dx + c)x + b)x + a
 def evaluate_polynomial(polynomial, part, value):
-    # print(value, polynomial[part])
     last = len(polynomial[part]) - 1
     result = polynomial[part][last]
     s = last - 1
@@ -92,10 +91,7 @@ def evaluate_polynomial(polynomial, part, value):
 def split_secret_to_int(secret):
     result = []
     hex_data = hexlify(secret.encode('ascii')).decode('ascii')  # "".join("{:02x}".format(ord(c)) for c in secret)
-    # print(hex_data)
-    # print(len(hex_data))
     count = math.ceil(len(hex_data) / 64.0)
-    # print(count)
     i = 0
     while i < count:
         if (i + 1) * 64 < len(hex_data):
@@ -118,12 +114,9 @@ def split_secret_to_int(secret):
 def merge_int_to_string(secrets):
     hex_data = ""
     for s in secrets:
-        # tmp = "{0:0{1}x}".format(s,32)  #to_hex(s)
         tmp = to_hex(s)
-        # print("tmp:", tmp)
         hex_data += tmp
     byte_data = unhexlify(hex_data).decode('ascii').rstrip('\x00')
-    # print(byte_data)
     return byte_data
 
 
@@ -149,7 +142,6 @@ def create(minimum, shares, secret, is_base64):
 
     # Convert the secrets to its respective 256-bit Int representation.
     secrets = split_secret_to_int(secret)
-    # print("secrets:", secrets)
 
     # List of currently used numbers in the polynomial
     numbers = [0]
@@ -164,7 +156,6 @@ def create(minimum, shares, secret, is_base64):
     # polynomial[parts][minimum]
     # https://www.geeksforgeeks.org/python-using-2d-arrays-lists-the-right-way/
     polynomial = [[0 for i in range(minimum)] for j in range(len(secrets))]
-    # print(polynomial)
     for i in range(len(secrets)):
         polynomial[i][0] = secrets[i]
         j = 1
@@ -177,7 +168,6 @@ def create(minimum, shares, secret, is_base64):
 
             polynomial[i][j] = number
             j = j + 1
-    # print("polynomial:", polynomial)
 
     # Create the points object; this holds the (x, y) points of each share.
     # Again, because secrets is an array, each share could have multiple parts
@@ -212,7 +202,6 @@ def create(minimum, shares, secret, is_base64):
                 s += to_hex(points[i][j][0])
                 s += to_hex(points[i][j][1])
         result.append(s)
-    # print("create:", points)
     return result
 
 
@@ -232,7 +221,6 @@ def combine(shares, is_base64):
         points = decode_share_base64(shares)
     else:
         points = decode_share_hex(shares)
-    # print("combine:", points)
 
     # Use Lagrange Polynomial Interpolation (LPI) to reconstruct the secrets.
     # For each part of the secrets (clearest to iterate over)...
@@ -266,7 +254,6 @@ def combine(shares, is_base64):
 
             # LPI sum: s = fx + fx + ...
             secrets[j] = (secrets[j] + fx) % PRIME
-    # print("secrets:", secrets)
     return merge_int_to_string(secrets)
 
 
@@ -287,7 +274,6 @@ def decode_share_base64(shares):
         # find the number of parts it represents.
         share = shares[i]
         count = (int)(len(share) / 88)
-        # print("count:", count)
         secrets[i] = [0] * count
 
         # and for each part, find the x,y pair...
