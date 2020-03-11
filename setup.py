@@ -21,8 +21,6 @@ AUTHOR = 'NghiaTC'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    # 'appdirs',
-    # 'certifi',
 ]
 TEST_REQUIRED = [
     'pep8',
@@ -121,11 +119,12 @@ setup(
     description=DESCRIPTION,
     keywords=['ntc-pcrypto', 'pcrypto', 'cryptography', 'crypto', 'encrypt'],
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
     # packages=find_packages(exclude=('tests','scripts')),
-    packages=find_packages(exclude=('scripts')),
+    # packages=find_packages(exclude=('scripts')),
     entry_points={
             'console_scripts': [],
     },
@@ -137,7 +136,7 @@ setup(
     },
     tests_require=TEST_REQUIRED,
     include_package_data=True,
-    license='MIT',
+    license='Apache License 2.0',
 
     classifiers=[
         # Trove classifiers
