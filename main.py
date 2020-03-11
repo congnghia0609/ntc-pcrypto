@@ -1,3 +1,7 @@
+"""
+@author nghiatc
+@since Mar 10, 2020
+"""
 from sss.sss import *
 
 
