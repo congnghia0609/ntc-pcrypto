@@ -12,9 +12,11 @@ from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
 NAME = 'ntc-pcrypto'
-VERSION = '0.0.2'
+VERSION = '0.0.4'
 DESCRIPTION = 'ntc-pcrypto is module python cryptography'
-LONG_DESCRIPTION = 'ntc-pcrypto is module python cryptography'
+# LONG_DESCRIPTION = 'ntc-pcrypto is module python cryptography'
+with open("README.md", "r") as fh:
+    LONG_DESCRIPTION = fh.read()
 URL = 'https://github.com/congnghia0609/ntc-pcrypto'
 EMAIL = 'congnghia0609@gmail.com'
 AUTHOR = 'NghiaTC'
@@ -57,7 +59,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 
 class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass into py.test")]
+    user_options = [('pytest-args=', 'a', "Arguments to pass into py.tests")]
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
@@ -123,11 +125,12 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    # packages=find_packages(exclude=('tests','scripts')),
+    # packages=find_packages(),
+    packages=find_packages(exclude=('tests','scripts')),
     # packages=find_packages(exclude=('scripts')),
-    entry_points={
-            'console_scripts': [],
-    },
+    # entry_points={
+    #         'console_scripts': [],
+    # },
     install_requires=REQUIRED,
     extras_require={
         'dev': TEST_REQUIRED + BUILD_REQUIRED,
