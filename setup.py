@@ -142,7 +142,7 @@ setup(
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache License Version 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English', 'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Topic :: Software Development :: Libraries',
