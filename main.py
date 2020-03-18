@@ -26,8 +26,8 @@ def test_dev():
     # number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
     # print(number)
     # b64data = to_base64(number)
-    # print(len(b64data))
-    # print(b64data)  # lOpFwywpCeVAcK0/LOKG+YtW71xyj1bX06CcW7VZMFc=
+    # print(len(b64data))  # 44
+    # print(b64data)  # lOpFwywpCeVAcK0_LOKG-YtW71xyj1bX06CcW7VZMFc=
     # hexdata = to_hex(number)
     # print(len(hexdata))  # 64
     # print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
@@ -157,11 +157,11 @@ def test4():
 
 if __name__ == '__main__':
     # test_dev
-    # test_dev()
+    test_dev()
 
     # create & combine
     # test1
-    test1()
+    # test1()
 
     # # test2
     # test2()
