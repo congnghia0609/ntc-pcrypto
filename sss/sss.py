@@ -330,7 +330,7 @@ def is_valid_share_base64(candidate):
     while j < count:
         part = candidate[j * 44:(j + 1) * 44]
         decode = from_base64(part)
-        if decode < 0 or decode == PRIME:
+        if decode <= 0 or decode >= PRIME:
             return False
         j = j + 1
     return True
@@ -351,7 +351,7 @@ def is_valid_share_hex(candidate):
     while j < count:
         part = candidate[j * 64:(j + 1) * 64]
         decode = from_hex(part)
-        if decode < 0 or decode == PRIME:
+        if decode <= 0 or decode >= PRIME:
             return False
         j = j + 1
     return True

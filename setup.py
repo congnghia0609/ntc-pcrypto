@@ -12,7 +12,7 @@ from setuptools.command.test import test as TestCommand
 
 # Package meta-data.
 NAME = 'ntc-pcrypto'
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 DESCRIPTION = 'ntc-pcrypto is module python cryptography'
 # LONG_DESCRIPTION = 'ntc-pcrypto is module python cryptography'
 with open("README.md", "r") as fh:
