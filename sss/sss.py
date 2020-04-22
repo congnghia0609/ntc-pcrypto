@@ -286,7 +286,7 @@ def decode_share_base64(shares):
     return secrets
 
 
-# akes a string array of shares encoded in Hex created via Shamir's
+# Takes a string array of shares encoded in Hex created via Shamir's
 # Algorithm; each string must be of equal length of a multiple of 128 characters
 # as a single 128 character share is a pair of 256-bit numbers (x, y).
 def decode_share_hex(shares):
