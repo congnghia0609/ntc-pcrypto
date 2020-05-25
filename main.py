@@ -20,33 +20,32 @@ def test_dev():
     # print((a * v) % PRIME)
     # # 1
 
-    # # 3. encode/decode
-    # # number = 2020
-    # # encode
-    # number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
-    # print(number)
-    # b64data = to_base64(number)
-    # print(len(b64data))  # 44
-    # print(b64data)  # lOpFwywpCeVAcK0_LOKG-YtW71xyj1bX06CcW7VZMFc=
-    # hexdata = to_hex(number)
-    # print(len(hexdata))  # 64
-    # print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
-    # # decode
-    # numb64decode = from_base64(b64data)
-    # print(numb64decode)
-    # numhexdecode = from_hex(hexdata)
-    # print(numhexdecode)
+    # 3. encode/decode
+    # encode
+    number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
+    print(number)
+    b64data = to_base64(number)
+    print(len(b64data))  # 44
+    print(b64data)  # lOpFwywpCeVAcK0_LOKG-YtW71xyj1bX06CcW7VZMFc=
+    hexdata = to_hex(number)
+    print(len(hexdata))  # 64
+    print(hexdata)  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
+    # decode
+    numb64decode = from_base64(b64data)
+    print(numb64decode)
+    numhexdecode = from_hex(hexdata)
+    print(numhexdecode)
 
-    # 4. split & merge
-    s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    print(s)
-    print(len(s))
-    arr = split_secret_to_int(s)
-    print(arr)
-    print(in_numbers(arr, 49937119214509114343548691117920141602615245118674498473442528546336026425464))
-    rs = merge_int_to_string(arr)
-    print(rs)
-    print(len(rs))
+    # # 4. split & merge
+    # s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    # print(s)
+    # print(len(s))
+    # arr = split_secret_to_int(s)
+    # print(arr)
+    # print(in_numbers(arr, 49937119214509114343548691117920141602615245118674498473442528546336026425464))
+    # rs = merge_int_to_string(arr)
+    # print(rs)
+    # print(len(rs))
 
 
 def test1():

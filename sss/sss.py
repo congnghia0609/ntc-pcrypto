@@ -137,8 +137,12 @@ def create(minimum, shares, secret, is_base64):
     # Verify minimum isn't greater than shares; there is no way to recreate
     # the original polynomial in our current setup, therefore it doesn't make
     # sense to generate fewer shares than are needed to reconstruct the secrets.
+    if minimum <= 0 or shares <= 0:
+        raise Exception('minimum or shares is invalid')
     if minimum > shares:
         raise Exception('cannot require more shares then existing')
+    if len(secret) == 0:
+        raise Exception('secret is empty')
 
     # Convert the secrets to its respective 256-bit Int representation.
     secrets = split_secret_to_int(secret)
@@ -161,12 +165,12 @@ def create(minimum, shares, secret, is_base64):
         j = 1
         while j < minimum:
             # Each coefficient should be unique
-            number = random_number()
-            while in_numbers(numbers, number):
-                number = random_number()
-            numbers.append(number)
+            x = random_number()
+            while in_numbers(numbers, x):
+                x = random_number()
+            numbers.append(x)
 
-            polynomial[i][j] = number
+            polynomial[i][j] = x
             j = j + 1
 
     # Create the points object; this holds the (x, y) points of each share.
@@ -177,30 +181,27 @@ def create(minimum, shares, secret, is_base64):
     # Note: this array is technically unnecessary due to creating result
     # in the inner loop. Can disappear later if desired.
     #
-    # points[shares][parts][2]
-    points = [[[0 for i in range(2)] for j in range(len(secrets))] for k in range(shares)]
     # For every share...
     for i in range(shares):
         s = ""
         # and every part of the secrets...
         for j in range(len(secrets)):
             # generate a new x-coordinate.
-            number = random_number()
-            while in_numbers(numbers, number):
-                number = random_number()
-            numbers.append(number)
+            x = random_number()
+            while in_numbers(numbers, x):
+                x = random_number()
+            numbers.append(x)
 
             # and evaluate the polynomial at that point.
-            points[i][j][0] = number
-            points[i][j][1] = evaluate_polynomial(polynomial, j, number)
+            y = evaluate_polynomial(polynomial, j, x)
 
             # add it to results.
             if is_base64:
-                s += to_base64(points[i][j][0])
-                s += to_base64(points[i][j][1])
+                s += to_base64(x)
+                s += to_base64(y)
             else:
-                s += to_hex(points[i][j][0])
-                s += to_hex(points[i][j][1])
+                s += to_hex(x)
+                s += to_hex(y)
         result.append(s)
     return result
 
