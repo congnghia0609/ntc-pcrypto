@@ -52,6 +52,7 @@ BUILD_REQUIRED = [
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.rst' is present in your MANIFEST.in file!
 # with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
@@ -126,7 +127,7 @@ setup(
     author_email=EMAIL,
     url=URL,
     # packages=find_packages(),
-    packages=find_packages(exclude=('tests','scripts')),
+    packages=find_packages(exclude=('tests', 'scripts')),
     # packages=find_packages(exclude=('scripts')),
     # entry_points={
     #         'console_scripts': [],
