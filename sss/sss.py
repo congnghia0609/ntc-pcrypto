@@ -44,7 +44,7 @@ def modinv(a, m):
 def to_base64(number):
     numbyte = number.to_bytes(32, 'big')
     b64data = urlsafe_b64encode(numbyte)
-    return b64data.decode('ascii')
+    return b64data.decode('utf8')
 
 
 # Returns the number base64 in base 10 Int representation; note: this is
@@ -59,8 +59,8 @@ def from_base64(number):
 # not a string representation; the Hex output is exactly 256 bits long.
 def to_hex(number):
     numbyte = number.to_bytes(32, 'big')
-    hexdata = hexlify(numbyte).decode('ascii')
-    return hexdata
+    hex_data = hexlify(numbyte).decode('utf8')
+    return hex_data
 
 
 # Returns the number Hex in base 10 Int representation; note: this is
@@ -85,12 +85,12 @@ def evaluate_polynomial(polynomial, part, value):
     return result
 
 
-# Converts a byte array into an a 256-bit Int, array based upon size of
+# Converts a byte array into a 256-bit Int, array based upon size of
 # the input byte; all values are right-padded to length 256, even if the most
 # significant bit is zero.
 def split_secret_to_int(secret):
     result = []
-    hex_data = hexlify(secret.encode('ascii')).decode('ascii')  # "".join("{:02x}".format(ord(c)) for c in secret)
+    hex_data = hexlify(secret.encode('utf8')).decode('utf8')
     count = math.ceil(len(hex_data) / 64.0)
     i = 0
     while i < count:
@@ -116,7 +116,7 @@ def merge_int_to_string(secrets):
     for s in secrets:
         tmp = to_hex(s)
         hex_data += tmp
-    byte_data = unhexlify(hex_data).decode('ascii').rstrip('\x00')
+    byte_data = unhexlify(hex_data).decode('utf8').rstrip('\x00')
     return byte_data
 
 
@@ -241,11 +241,8 @@ def combine(shares, is_base64):
                     # combine them via half products.
                     # x=0 ==> [(0-bx)/(ax-bx)] * ...
                     bx = points[k][j][0]  # bx
-                    negbx = -bx  # (0 - bx)
-                    axbx = ax - bx  # (ax - bx)
-
-                    numerator = (numerator * negbx) % PRIME  # (0 - bx) * ...
-                    denominator = (denominator * axbx) % PRIME  # (ax - bx) * ...
+                    numerator = (numerator * -bx) % PRIME  # (0 - bx) * ...
+                    denominator = (denominator * (ax - bx)) % PRIME  # (ax - bx) * ...
 
             # LPI product: x=0, y = ay * [(x-bx)/(ax-bx)] * ...
             # multiply together the points (ay)(numerator)(denominator)^-1 ...
@@ -274,16 +271,16 @@ def decode_share_base64(shares):
 
         # find the number of parts it represents.
         share = shares[i]
-        count = (int)(len(share) / 88)
+        count = int(len(share) / 88)
         secrets[i] = [0] * count
 
         # and for each part, find the x,y pair...
         for j in range(count):
-            cshare = share[j * 88:(j + 1) * 88]
+            pair = share[j * 88:(j + 1) * 88]
             secrets[i][j] = [0] * 2
             # decoding from Base64.
-            secrets[i][j][0] = from_base64(cshare[0:44])
-            secrets[i][j][1] = from_base64(cshare[44:])
+            secrets[i][j][0] = from_base64(pair[0:44])
+            secrets[i][j][1] = from_base64(pair[44:])
     return secrets
 
 
@@ -303,16 +300,16 @@ def decode_share_hex(shares):
 
         # find the number of parts it represents.
         share = shares[i]
-        count = (int)(len(share) / 128)
+        count = int(len(share) / 128)
         secrets[i] = [0] * count
 
         # and for each part, find the x,y pair...
         for j in range(count):
-            cshare = share[j * 128:(j + 1) * 128]
+            pair = share[j * 128:(j + 1) * 128]
             secrets[i][j] = [0] * 2
             # decoding from Base64.
-            secrets[i][j][0] = from_hex(cshare[0:64])
-            secrets[i][j][1] = from_hex(cshare[64:])
+            secrets[i][j][0] = from_hex(pair[0:64])
+            secrets[i][j][1] = from_hex(pair[64:])
     return secrets
 
 
