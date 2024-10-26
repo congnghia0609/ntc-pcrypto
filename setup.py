@@ -14,7 +14,7 @@ from setuptools.command.test import test as TestCommand
 NAME = 'ntc-pcrypto'
 VERSION = '0.2.0'
 DESCRIPTION = 'ntc-pcrypto is a module python cryptography'
-# LONG_DESCRIPTION = 'ntc-pcrypto is module python cryptography'
+# LONG_DESCRIPTION = 'ntc-pcrypto is a module python cryptography'
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 URL = 'https://github.com/congnghia0609/ntc-pcrypto'
