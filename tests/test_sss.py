@@ -3,7 +3,7 @@ import unittest
 from sss.sss import *
 
 
-class MyTestCase(unittest.TestCase):
+class TestSSS(unittest.TestCase):
     def test_encode_decode_hex(self):
         number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
         # print(number)
