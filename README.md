@@ -1,5 +1,5 @@
 # ntc-pcrypto
-ntc-pcrypto is module python cryptography
+ntc-pcrypto is a module python cryptography
 
 ## Installation
 From pip:  
@@ -21,7 +21,7 @@ pip show ntc-pcrypto
 ## 1. An implementation of Shamir's Secret Sharing Algorithm 256-bits in Python
 
 ### Usage
-**Use encode/decode Base64**  
+**Use encode/decode Base64URL**  
 ```python
 from sss.sss import *
 
